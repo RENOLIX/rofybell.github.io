@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      (function () {
+        try {
+          var language = "fr";
+          var isAdmin = location.pathname.indexOf("/admin") === 0;
+          var effectiveLanguage = isAdmin ? "fr" : language;
+          document.documentElement.lang = effectiveLanguage;
+          document.documentElement.dir = effectiveLanguage === "ar" ? "rtl" : "ltr";
+          document.documentElement.dataset.language = effectiveLanguage;
+        } catch (error) {
+          document.documentElement.lang = "fr";
+          document.documentElement.dir = "ltr";
+        }
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#A8CFA5" />
+    <meta name="description" content="Rofybell, boutique cosmetique locale de cremes, parfums et rituels beaute premium." />
+    <link rel="icon" type="image/png" href="./favicon.png" />
+    <title>Rofybell | Cosmetics</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
