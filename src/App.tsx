@@ -1150,7 +1150,7 @@ const blankProduct = (): Product => ({
   name: "",
   nameAr: "",
   category: "Femme",
-  age: "Peau seche",
+  age: "Cosmetique",
   price: 0,
   oldPrice: undefined,
   rating: 4.9,
@@ -1304,19 +1304,11 @@ function AdminProducts() {
                 <input required value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} />
               </label>
               <label>
-                Nom arabe
-                <input dir="rtl" value={draft.nameAr || ""} onChange={(event) => setDraft({ ...draft, nameAr: event.target.value })} />
-              </label>
-              <label>
                 Categorie
                 <select required value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value })}>
                   <option value="Femme">Femme</option>
                   <option value="Homme">Homme</option>
                 </select>
-              </label>
-              <label>
-                Type de peau / Format
-                <input required value={draft.age} onChange={(event) => setDraft({ ...draft, age: event.target.value })} />
               </label>
               <label>
                 Prix (DA)
@@ -1335,20 +1327,8 @@ function AdminProducts() {
                 <input value={draft.badge || ""} onChange={(event) => setDraft({ ...draft, badge: event.target.value || undefined })} />
               </label>
               <label className="wide">
-                Image URL
-                <input value={draft.imageUrl || ""} onChange={(event) => setDraft({ ...draft, imageUrl: event.target.value, imageUrls: event.target.value ? [event.target.value] : undefined })} />
-              </label>
-              <label className="wide">
                 Description
                 <textarea required rows={4} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} />
-              </label>
-              <label className="wide">
-                Description arabe
-                <textarea dir="rtl" rows={4} value={draft.descriptionAr || ""} onChange={(event) => setDraft({ ...draft, descriptionAr: event.target.value })} />
-              </label>
-              <label className="wide">
-                Notes / benefices separes par des virgules
-                <input value={draft.skills.join(", ")} onChange={(event) => setDraft({ ...draft, skills: event.target.value.split(",").map((item) => item.trim()).filter(Boolean) })} />
               </label>
             </div>
             {error && <div className="admin-login-error">{error}</div>}
