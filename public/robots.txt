@@ -2,4 +2,4 @@ User-agent: *
 Disallow: /admin
 Allow: /
 
-Sitemap: https://renolix.github.io/rofybell.github.io/sitemap.xml
+Sitemap: https://rofybell.store/sitemap.xml
