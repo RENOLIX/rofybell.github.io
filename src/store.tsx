@@ -287,9 +287,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setSyncMode("local");
       return;
     }
-    const [saved] = await supabaseAnonRequest<Record<string, unknown>[]>("orders", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify(toOrderRow(order)) });
-    const nextOrder = saved ? fromOrderRow(saved) : order;
-    setOrders((current) => [nextOrder, ...current]);
+    await supabaseAnonRequest<unknown[]>("orders", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(toOrderRow(order)) });
+    setOrders((current) => [order, ...current]);
     setSyncMode("supabase");
   };
 
