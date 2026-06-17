@@ -126,7 +126,7 @@ using (public.is_rofybell_admin())
 with check (public.is_rofybell_admin());
 
 create policy "public orders insert"
-on public.orders for insert to anon, authenticated
+on public.orders for insert to public
 with check (true);
 
 create policy "authenticated orders read"
@@ -153,7 +153,7 @@ with check (public.is_rofybell_staff());
 
 grant usage on schema public to anon, authenticated;
 grant select on table public.products to anon, authenticated;
-grant insert on table public.orders to anon, authenticated;
+grant insert on table public.orders to public;
 grant select on table public.shipping_rates to anon, authenticated;
 grant select, insert, update, delete on table public.products to authenticated;
 grant select, insert, update, delete on table public.admin_users to authenticated;
