@@ -44,6 +44,7 @@ type StoreValue = {
   deleteProduct: (id: string) => Promise<void>;
   createOrder: (order: CustomerOrder) => Promise<void>;
   updateOrderStatus: (id: string, status: OrderStatus) => Promise<void>;
+  deleteOrder: (id: string) => Promise<void>;
   saveShippingRates: (rates: ShippingRate[]) => Promise<void>;
   saveUser: (user: AdminUser) => Promise<void>;
   createUser: (user: AdminUser, password: string) => Promise<void>;
@@ -312,6 +313,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const deleteOrder = async (id: string) => {
+    if (!hasSupabaseConfig) {
+      setOrders((current) => {
+        const next = current.filter((order) => order.id !== id);
+        writeStorage(ORDERS_KEY, next);
+        return next;
+      });
+      setSyncMode("local");
+      return;
+    }
+    await supabaseRequest(`orders?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+    setOrders((current) => current.filter((order) => order.id !== id));
+    setSyncMode("supabase");
+  };
+
   const saveShippingRates = async (rates: ShippingRate[]) => {
     const nextRates = mergeShippingRates(rates);
     if (!hasSupabaseConfig) {
@@ -378,7 +394,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setSyncMode("supabase");
   };
 
-  return <StoreContext.Provider value={{ products, users, orders, shippingRates, syncMode, saveProduct, deleteProduct, createOrder, updateOrderStatus, saveShippingRates, saveUser, createUser, deleteUser }}>{children}</StoreContext.Provider>;
+  return <StoreContext.Provider value={{ products, users, orders, shippingRates, syncMode, saveProduct, deleteProduct, createOrder, updateOrderStatus, deleteOrder, saveShippingRates, saveUser, createUser, deleteUser }}>{children}</StoreContext.Provider>;
 }
 
 export function useStore() {

@@ -1238,6 +1238,7 @@ textarea { resize: vertical; }
   cursor: pointer;
 }
 .table-actions button.danger { color: #a54250; }
+.order-actions button.danger { color: #a54250; }
 .table-actions svg,
 .order-actions svg { width: 17px; height: 17px; }
 .spin { animation: spin .8s linear infinite; }

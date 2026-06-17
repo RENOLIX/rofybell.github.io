@@ -871,8 +871,9 @@ function CheckoutPage() {
       await createOrder(order);
       clear();
       setDone(true);
-    } catch {
-      setError("La commande n'a pas pu etre envoyee. Verifiez la configuration Supabase.");
+    } catch (reason) {
+      const message = reason instanceof Error ? reason.message : "Erreur inconnue";
+      setError(`Commande non envoyee : ${message}`);
     } finally {
       setSaving(false);
     }
@@ -1490,8 +1491,23 @@ function statusLabel(status: OrderStatus) {
 }
 
 function AdminOrders() {
-  const { orders, updateOrderStatus } = useStore();
+  const { orders, updateOrderStatus, deleteOrder } = useStore();
   const [editing, setEditing] = useState<CustomerOrder | null>(null);
+  const [deletingId, setDeletingId] = useState("");
+  const [error, setError] = useState("");
+
+  const removeOrder = async (order: CustomerOrder) => {
+    setDeletingId(order.id);
+    setError("");
+    try {
+      await deleteOrder(order.id);
+      if (editing?.id === order.id) setEditing(null);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Suppression impossible");
+    } finally {
+      setDeletingId("");
+    }
+  };
 
   return (
     <>
@@ -1499,6 +1515,7 @@ function AdminOrders() {
         <div className="admin-table-head">
           <h2>{orders.length} commande{orders.length > 1 ? "s" : ""}</h2>
         </div>
+        {error && <div className="admin-login-error">{error}</div>}
         {orders.length ? (
           <div className="orders-table">
             {orders.map((order) => (
@@ -1527,8 +1544,11 @@ function AdminOrders() {
                     <option value="return">Retour</option>
                     <option value="cancelled">Annulee</option>
                   </select>
-                  <button onClick={() => setEditing(order)} aria-label={`Voir la commande ${order.id.slice(0, 8)}`}>
+                  <button type="button" onClick={() => setEditing(order)} aria-label={`Voir la commande ${order.id.slice(0, 8)}`}>
                     <Pencil />
+                  </button>
+                  <button type="button" className="danger" disabled={deletingId === order.id} onClick={() => removeOrder(order)} aria-label={`Supprimer la commande ${order.id.slice(0, 8)}`}>
+                    {deletingId === order.id ? <Loader2 className="spin" /> : <Trash2 />}
                   </button>
                 </div>
               </div>

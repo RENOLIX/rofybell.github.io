@@ -100,6 +100,7 @@ drop policy if exists "admin users management" on public.admin_users;
 drop policy if exists "public orders insert" on public.orders;
 drop policy if exists "authenticated orders read" on public.orders;
 drop policy if exists "authenticated orders update" on public.orders;
+drop policy if exists "authenticated orders delete" on public.orders;
 drop policy if exists "public shipping rates read" on public.shipping_rates;
 drop policy if exists "authenticated shipping rates management" on public.shipping_rates;
 
@@ -137,6 +138,10 @@ on public.orders for update to authenticated
 using (public.is_rofybell_staff())
 with check (public.is_rofybell_staff());
 
+create policy "authenticated orders delete"
+on public.orders for delete to authenticated
+using (public.is_rofybell_staff());
+
 create policy "public shipping rates read"
 on public.shipping_rates for select
 using (true);
@@ -152,7 +157,7 @@ grant insert on table public.orders to anon, authenticated;
 grant select on table public.shipping_rates to anon, authenticated;
 grant select, insert, update, delete on table public.products to authenticated;
 grant select, insert, update, delete on table public.admin_users to authenticated;
-grant select, update on table public.orders to authenticated;
+grant select, update, delete on table public.orders to authenticated;
 grant select, insert, update, delete on table public.shipping_rates to authenticated;
 
 insert into storage.buckets (id, name, public)
