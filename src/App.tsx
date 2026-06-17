@@ -357,10 +357,10 @@ function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          <h1>Une peau lumineuse. Un parfum qui reste.</h1>
+          <h1>Cosmetics pour elle et lui.</h1>
           <p>
-            Des soins cosmetiques choisis pour hydrater, illuminer et parfumer vos journees,
-            avec une commande simple et un paiement a la livraison.
+            Rofybell reunit des soins visage et des parfums pour femme et homme :
+            des textures agreables, des senteurs propres et une commande simple avec paiement a la livraison.
           </p>
           <div className="hero-actions">
             <PressButton to="/boutique" size="lg">
