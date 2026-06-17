@@ -68,11 +68,13 @@ import {
 } from "./store";
 import rofybellLogo from "./assets/rofybell-logo.png";
 import rofybellHero from "./assets/rofybell-hero.png";
+import rofybellHeroMobile from "./assets/rofybell-hero-mobile.png";
 
 const money = (value: number) => `${value.toLocaleString("fr-DZ")} DA`;
 const sitePhone = "0558413077";
 const siteEmail = "contact@rofybell.dz";
 const heroImage = rofybellHero;
+const heroMobileImage = rofybellHeroMobile;
 const storyImage =
   "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1300&q=86";
 
@@ -349,7 +351,10 @@ function HomePage() {
   return (
     <>
       <section className="hero">
-        <img src={heroImage} alt="Cremes et parfums Rofybell" />
+        <picture>
+          <source media="(max-width: 780px)" srcSet={heroMobileImage} />
+          <img src={heroImage} alt="Cremes et parfums Rofybell" />
+        </picture>
         <div className="hero-wash" />
         <motion.div
           className="shell hero-content"
