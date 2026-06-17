@@ -1,5 +1,5 @@
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://nuwqftpabpycrplltvgj.supabase.co";
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_mZgMvoO99xMwkZadtnrbdA_KSPeXcrM";
 export const hasSupabaseConfig = Boolean(SUPABASE_URL && SUPABASE_KEY);
 
 const headers = {
@@ -17,7 +17,7 @@ export function getAdminSession(): SupabaseSession | null {
 }
 
 export async function signInAdmin(email: string, password: string) {
-  if (email.trim().toLowerCase() === "admin@rofybell.dz" && password === "Rofybell2026") {
+  if (!hasSupabaseConfig && email.trim().toLowerCase() === "admin@rofybell.dz" && password === "Rofybell2026") {
     const session: SupabaseSession = {
       access_token: "local-admin",
       refresh_token: "local-admin",
