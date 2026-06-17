@@ -67,12 +67,12 @@ import {
   type OrderStatus,
 } from "./store";
 import rofybellLogo from "./assets/rofybell-logo.png";
+import rofybellHero from "./assets/rofybell-hero.png";
 
 const money = (value: number) => `${value.toLocaleString("fr-DZ")} DA`;
 const sitePhone = "0558413077";
 const siteEmail = "contact@rofybell.dz";
-const heroImage =
-  "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1800&q=88";
+const heroImage = rofybellHero;
 const storyImage =
   "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1300&q=86";
 
