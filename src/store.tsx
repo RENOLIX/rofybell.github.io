@@ -173,7 +173,9 @@ const mergeShippingRates = (rates: ShippingRate[]) => defaultShippingRates.map((
 });
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(() => readStorage(PRODUCTS_KEY, initialProducts));
+  const [products, setProducts] = useState<Product[]>(() => (
+    hasSupabaseConfig ? [] : readStorage(PRODUCTS_KEY, initialProducts)
+  ));
   const [users, setUsers] = useState<AdminUser[]>(() => readStorage(USERS_KEY, defaultUsers));
   const [orders, setOrders] = useState<CustomerOrder[]>(() => readStorage(ORDERS_KEY, []));
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>(() => readStorage(SHIPPING_KEY, defaultShippingRates));
@@ -188,7 +190,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const syncPublicData = () => {
       supabaseAnonRequest<Record<string, unknown>[]>("products?select=*&order=name")
       .then((remoteProducts) => {
-        if (remoteProducts.length) setProducts(remoteProducts.map(fromProductRow));
+        setProducts(remoteProducts.map(fromProductRow));
+        localStorage.removeItem(PRODUCTS_KEY);
         setSyncMode("supabase");
       })
       .catch((error) => {
@@ -272,7 +275,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setSyncMode("local");
       return;
     }
-    await supabaseRequest(`products?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+    const deletedProducts = await supabaseRequest<Record<string, unknown>[]>(
+      `products?id=eq.${encodeURIComponent(id)}`,
+      { method: "DELETE" },
+    );
+    if (!deletedProducts.length) {
+      throw new Error("Le produit n'a pas ete supprime dans Supabase. Verifiez les droits du compte administrateur.");
+    }
     setProducts((current) => current.filter((item) => item.id !== id));
     setSyncMode("supabase");
   };
