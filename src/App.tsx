@@ -10,6 +10,7 @@ import {
   ImagePlus,
   Instagram,
   LayoutDashboard,
+  Loader2,
   Mail,
   MapPin,
   Menu,
@@ -1175,13 +1176,27 @@ function AdminProducts() {
   const { products, saveProduct, deleteProduct, syncMode } = useStore();
   const [draft, setDraft] = useState<Product | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState("");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
 
   const close = () => {
     setDraft(null);
     setError("");
     setUploading(false);
+  };
+
+  const removeProduct = async (product: Product) => {
+    setDeletingId(product.id);
+    setActionError("");
+    try {
+      await deleteProduct(product.id);
+    } catch (reason) {
+      setActionError(reason instanceof Error ? reason.message : "Suppression impossible");
+    } finally {
+      setDeletingId("");
+    }
   };
 
   const submit = async (event: FormEvent) => {
@@ -1238,6 +1253,7 @@ function AdminProducts() {
             <Plus /> Ajouter un produit
           </PressButton>
         </div>
+        {actionError && <div className="admin-login-error">{actionError}</div>}
         <div className="product-admin-grid">
           {products.map((product) => (
             <article key={product.id}>
@@ -1250,11 +1266,11 @@ function AdminProducts() {
                 </p>
               </div>
               <div className="table-actions">
-                <button onClick={() => setDraft(product)} aria-label={`Modifier ${product.name}`}>
+                <button type="button" onClick={() => setDraft(product)} aria-label={`Modifier ${product.name}`}>
                   <Pencil />
                 </button>
-                <button className="danger" onClick={() => deleteProduct(product.id)} aria-label={`Supprimer ${product.name}`}>
-                  <Trash2 />
+                <button type="button" className="danger" disabled={deletingId === product.id} onClick={() => removeProduct(product)} aria-label={`Supprimer ${product.name}`}>
+                  {deletingId === product.id ? <Loader2 className="spin" /> : <Trash2 />}
                 </button>
               </div>
             </article>

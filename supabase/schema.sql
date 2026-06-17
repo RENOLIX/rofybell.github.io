@@ -59,6 +59,40 @@ alter table public.admin_users enable row level security;
 alter table public.orders enable row level security;
 alter table public.shipping_rates enable row level security;
 
+create or replace function public.is_rofybell_staff()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.admin_users au
+    where au.id = auth.uid()
+      and au.active = true
+  );
+$$;
+
+create or replace function public.is_rofybell_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.admin_users au
+    where au.id = auth.uid()
+      and au.role = 'admin'
+      and au.active = true
+  );
+$$;
+
+grant execute on function public.is_rofybell_staff() to authenticated;
+grant execute on function public.is_rofybell_admin() to authenticated;
+
 drop policy if exists "public products read" on public.products;
 drop policy if exists "authenticated products management" on public.products;
 drop policy if exists "authenticated users read" on public.admin_users;
@@ -75,51 +109,20 @@ using (true);
 
 create policy "authenticated products management"
 on public.products for all to authenticated
-using (
-  exists (
-    select 1 from public.admin_users au
-    where au.id = auth.uid()
-      and au.active = true
-  )
-)
-with check (
-  exists (
-    select 1 from public.admin_users au
-    where au.id = auth.uid()
-      and au.active = true
-  )
-);
+using (public.is_rofybell_staff())
+with check (public.is_rofybell_staff());
 
 create policy "authenticated users read"
 on public.admin_users for select to authenticated
 using (
   id = auth.uid()
-  or exists (
-    select 1 from public.admin_users au
-    where au.id = auth.uid()
-      and au.role = 'admin'
-      and au.active = true
-  )
+  or public.is_rofybell_admin()
 );
 
 create policy "admin users management"
 on public.admin_users for all to authenticated
-using (
-  exists (
-    select 1 from public.admin_users au
-    where au.id = auth.uid()
-      and au.role = 'admin'
-      and au.active = true
-  )
-)
-with check (
-  exists (
-    select 1 from public.admin_users au
-    where au.id = auth.uid()
-      and au.role = 'admin'
-      and au.active = true
-  )
-);
+using (public.is_rofybell_admin())
+with check (public.is_rofybell_admin());
 
 create policy "public orders insert"
 on public.orders for insert to anon, authenticated
@@ -127,30 +130,12 @@ with check (true);
 
 create policy "authenticated orders read"
 on public.orders for select to authenticated
-using (
-  exists (
-    select 1 from public.admin_users au
-    where au.id = auth.uid()
-      and au.active = true
-  )
-);
+using (public.is_rofybell_staff());
 
 create policy "authenticated orders update"
 on public.orders for update to authenticated
-using (
-  exists (
-    select 1 from public.admin_users au
-    where au.id = auth.uid()
-      and au.active = true
-  )
-)
-with check (
-  exists (
-    select 1 from public.admin_users au
-    where au.id = auth.uid()
-      and au.active = true
-  )
-);
+using (public.is_rofybell_staff())
+with check (public.is_rofybell_staff());
 
 create policy "public shipping rates read"
 on public.shipping_rates for select
@@ -158,20 +143,8 @@ using (true);
 
 create policy "authenticated shipping rates management"
 on public.shipping_rates for all to authenticated
-using (
-  exists (
-    select 1 from public.admin_users au
-    where au.id = auth.uid()
-      and au.active = true
-  )
-)
-with check (
-  exists (
-    select 1 from public.admin_users au
-    where au.id = auth.uid()
-      and au.active = true
-  )
-);
+using (public.is_rofybell_staff())
+with check (public.is_rofybell_staff());
 
 grant usage on schema public to anon, authenticated;
 grant select on table public.products to anon, authenticated;

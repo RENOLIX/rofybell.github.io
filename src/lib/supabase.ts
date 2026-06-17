@@ -12,8 +12,40 @@ const SESSION_KEY = "rofybell-admin-session";
 export const ADMIN_SESSION_EVENT = "rofybell-admin-session-change";
 type SupabaseSession = { access_token: string; refresh_token: string; user: { id: string; email?: string; user_metadata?: { name?: string; role?: string } } };
 
+async function readSupabaseError(response: Response) {
+  const fallback = `Supabase ${response.status}`;
+  try {
+    const text = await response.text();
+    if (!text) return fallback;
+    try {
+      const payload = JSON.parse(text) as { message?: string; error?: string; error_description?: string; details?: string; hint?: string };
+      return [payload.message, payload.error_description, payload.error, payload.details, payload.hint].filter(Boolean).join(" - ") || fallback;
+    } catch {
+      return text;
+    }
+  } catch {
+    return fallback;
+  }
+}
+
 export function getAdminSession(): SupabaseSession | null {
   try { return JSON.parse(localStorage.getItem(SESSION_KEY) || "null") as SupabaseSession | null; } catch { return null; }
+}
+
+async function refreshAdminSession(session: SupabaseSession) {
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ refresh_token: session.refresh_token }),
+  });
+  if (!response.ok) {
+    signOutAdmin();
+    throw new Error("Session admin expiree. Reconnectez-vous.");
+  }
+  const refreshed = await response.json() as SupabaseSession;
+  localStorage.setItem(SESSION_KEY, JSON.stringify(refreshed));
+  window.dispatchEvent(new Event(ADMIN_SESSION_EVENT));
+  return refreshed;
 }
 
 export async function signInAdmin(email: string, password: string) {
@@ -52,12 +84,19 @@ export function signOutAdmin() {
 export async function supabaseRequest<T>(path: string, init: RequestInit = {}) {
   if (!hasSupabaseConfig) throw new Error("Supabase non configure");
   const session = getAdminSession();
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+  if (!session) throw new Error("Connexion administrateur requise");
+  const request = (accessToken: string) => fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     ...init,
-    headers: { ...headers, Authorization: `Bearer ${session?.access_token || SUPABASE_KEY}`, Prefer: "return=representation", ...init.headers },
+    headers: { ...headers, Authorization: `Bearer ${accessToken}`, Prefer: "return=representation", ...init.headers },
   });
+  let response = await request(session.access_token);
 
-  if (!response.ok) throw new Error(`Supabase ${response.status}`);
+  if (response.status === 401) {
+    const refreshed = await refreshAdminSession(session);
+    response = await request(refreshed.access_token);
+  }
+
+  if (!response.ok) throw new Error(await readSupabaseError(response));
   if (response.status === 204) return [] as T;
   const text = await response.text();
   return (text ? JSON.parse(text) : []) as T;
@@ -70,7 +109,7 @@ export async function supabaseAnonRequest<T>(path: string, init: RequestInit = {
     headers: { ...headers, Prefer: "return=representation", ...init.headers },
   });
 
-  if (!response.ok) throw new Error(`Supabase ${response.status}`);
+  if (!response.ok) throw new Error(await readSupabaseError(response));
   if (response.status === 204) return [] as T;
   const text = await response.text();
   return (text ? JSON.parse(text) : []) as T;

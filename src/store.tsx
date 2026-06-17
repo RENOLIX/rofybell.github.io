@@ -185,7 +185,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
 
     const syncPublicData = () => {
-      supabaseRequest<Record<string, unknown>[]>("products?select=*&order=name")
+      supabaseAnonRequest<Record<string, unknown>[]>("products?select=*&order=name")
       .then((remoteProducts) => {
         if (remoteProducts.length) setProducts(remoteProducts.map(fromProductRow));
         setSyncMode("supabase");
@@ -195,7 +195,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setSyncMode("error");
       });
 
-      supabaseRequest<Record<string, unknown>[]>("shipping_rates?select=*&order=wilaya")
+      supabaseAnonRequest<Record<string, unknown>[]>("shipping_rates?select=*&order=wilaya")
       .then((remoteRates) => {
         if (remoteRates.length) setShippingRates(mergeShippingRates(remoteRates.map(fromShippingRateRow)));
       })
@@ -286,7 +286,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setSyncMode("local");
       return;
     }
-    const [saved] = await supabaseAnonRequest<Record<string, unknown>[]>("orders", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(toOrderRow(order)) });
+    const [saved] = await supabaseAnonRequest<Record<string, unknown>[]>("orders", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify(toOrderRow(order)) });
     const nextOrder = saved ? fromOrderRow(saved) : order;
     setOrders((current) => [nextOrder, ...current]);
     setSyncMode("supabase");

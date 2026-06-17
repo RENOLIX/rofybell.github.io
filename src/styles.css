@@ -1240,6 +1240,8 @@ textarea { resize: vertical; }
 .table-actions button.danger { color: #a54250; }
 .table-actions svg,
 .order-actions svg { width: 17px; height: 17px; }
+.spin { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 .admin-empty-state {
   min-height: 230px;
   display: grid;
